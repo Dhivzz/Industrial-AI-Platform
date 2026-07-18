@@ -5,16 +5,24 @@ import requests
 st.set_page_config(
     page_title="Industrial AI Predictive Maintenance",
     page_icon="⚙️",
-    layout="centered"
+    layout="wide"
 )
 
 
-st.title("⚙️ Industrial AI Predictive Maintenance System")
+# -------------------------------
+# Title
+# -------------------------------
+
+st.title("⚙️ Industrial AI Predictive Maintenance Dashboard")
 
 st.write(
-    "Predict machine failure risk using Machine Learning"
+    "AI-powered machine failure prediction and condition monitoring"
 )
 
+
+# -------------------------------
+# Sidebar Inputs
+# -------------------------------
 
 st.sidebar.header("Machine Parameters")
 
@@ -44,57 +52,59 @@ tool_wear = st.sidebar.number_input(
     value=153
 )
 
-
 machine_type = st.sidebar.selectbox(
     "Machine Type",
     ["H", "L", "M"]
 )
 
 
+# -------------------------------
+# Feature calculation
+# -------------------------------
+
 temperature_difference = (
     process_temperature - air_temperature
 )
-
 
 power = (
     rotational_speed * torque
 )
 
+tool_wear_medium = (
+    tool_wear >= 100 and tool_wear < 200
+)
 
-tool_wear_medium = tool_wear >= 100 and tool_wear < 200
-tool_wear_high = tool_wear >= 200
-
+tool_wear_high = (
+    tool_wear >= 200
+)
 
 type_L = machine_type == "L"
+
 type_M = machine_type == "M"
 
 
 
-if st.button("Predict Machine Condition"):
+# -------------------------------
+# Prediction
+# -------------------------------
+
+if st.button("🔍 Predict Machine Condition"):
+
 
     input_data = {
 
         "air_temperature": air_temperature,
-
         "process_temperature": process_temperature,
-
         "rotational_speed": rotational_speed,
-
         "torque": torque,
-
         "tool_wear": tool_wear,
-
         "temperature_difference": temperature_difference,
-
         "power": power,
-
         "type_L": type_L,
-
         "type_M": type_M,
-
         "tool_wear_medium": tool_wear_medium,
-
         "tool_wear_high": tool_wear_high
+
     }
 
 
@@ -106,38 +116,126 @@ if st.button("Predict Machine Condition"):
 
     if response.status_code == 200:
 
+
         result = response.json()
 
 
-        st.subheader("Prediction Result")
+        prediction = result["failure_prediction"]
+
+        probability = result["failure_probability"]
+
+        risk = result["risk"]
 
 
-        if result["failure_prediction"] == 1:
 
-            st.error(
-                "⚠️ Machine Failure Risk Detected"
+        st.divider()
+
+        col1, col2, col3 = st.columns(3)
+
+
+        # Status Card
+
+        with col1:
+
+            st.subheader("Machine Status")
+
+            if prediction == 0:
+
+                st.success(
+                    "🟢 HEALTHY"
+                )
+
+            else:
+
+                st.error(
+                    "🔴 FAILURE RISK"
+                )
+
+
+        # Probability
+
+        with col2:
+
+            st.subheader("Failure Probability")
+
+            st.metric(
+                "Risk Probability",
+                f"{probability}%"
+            )
+
+
+        # Risk
+
+        with col3:
+
+            st.subheader("Risk Level")
+
+            st.info(
+                risk
+            )
+
+
+
+        st.divider()
+
+
+        st.subheader(
+            "Machine Parameters"
+        )
+
+
+        parameter_data = {
+
+            "Air Temperature": air_temperature,
+
+            "Process Temperature": process_temperature,
+
+            "Rotational Speed": rotational_speed,
+
+            "Torque": torque,
+
+            "Tool Wear": tool_wear,
+
+            "Power": power
+
+        }
+
+
+        st.json(
+            parameter_data
+        )
+
+
+
+        st.divider()
+
+
+        st.subheader(
+            "Maintenance Recommendation"
+        )
+
+
+        if risk == "Low":
+
+            st.success(
+                "Continue normal operation. Monitor machine condition regularly."
+            )
+
+        elif risk == "Medium":
+
+            st.warning(
+                "Schedule preventive inspection."
             )
 
         else:
 
-            st.success(
-                "✅ Machine Healthy"
+            st.error(
+                "Immediate maintenance recommended."
             )
-
-
-        st.metric(
-            "Failure Probability",
-            f'{result["failure_probability"]}%'
-        )
-
-
-        st.info(
-            f'Risk Level: {result["risk"]}'
-        )
 
 
     else:
 
         st.error(
-            "API Error. Check FastAPI server."
+            "API connection failed. Check FastAPI server."
         )
