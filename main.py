@@ -13,6 +13,12 @@ from src.eda import (
     machine_failure_summary,
     machine_type_summary
 )
+from src.visualization import (
+    plot_failure_distribution,
+    plot_failure_by_type,
+    plot_correlation_heatmap,
+    plot_feature_boxplots
+)
 # Load data
 df = load_data("data/ai4i2020.csv")
 
@@ -43,3 +49,10 @@ machine_failure_summary(df)
 
 print("\n")
 machine_type_summary(df)
+
+plot_failure_distribution(df)
+
+plot_failure_by_type(df)
+plot_correlation_heatmap(df)
+
+plot_feature_boxplots(df)
