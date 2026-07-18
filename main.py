@@ -19,6 +19,15 @@ from src.visualization import (
     plot_correlation_heatmap,
     plot_feature_boxplots
 )
+from src.train_model import (
+    train_model,
+    save_model
+)
+from src.evaluate import (
+    evaluate_model,
+    plot_confusion_matrix,
+    plot_feature_importance
+)
 # Load data
 df = load_data("data/ai4i2020.csv")
 
@@ -56,3 +65,22 @@ plot_failure_by_type(df)
 plot_correlation_heatmap(df)
 
 plot_feature_boxplots(df)
+model, X_test, y_test = train_model(df)
+
+save_model(model)
+evaluate_model(
+    model,
+    X_test,
+    y_test
+)
+
+plot_confusion_matrix(
+    model,
+    X_test,
+    y_test
+)
+
+plot_feature_importance(
+    model,
+    X_test
+)
