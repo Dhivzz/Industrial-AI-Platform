@@ -15,3 +15,5 @@ env/
 # Models
 *.pkl
 *.h5
+# Generated reports
+reports/figures/
